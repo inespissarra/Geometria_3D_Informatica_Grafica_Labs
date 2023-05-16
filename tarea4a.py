@@ -4,15 +4,16 @@ from OpenGL.GLUT import *
 import sys
 import numpy as np
 
-# Tamanho de la ventana :)
-width = 700
-height = 700
+x = 350
+y = 350
+width = 2*x
+height = 2*y
 centro = [0, 0]
 raton = centro
-xmin = -float(width/2)
-ymin = -float(height/2)
-xmax = float(width/2)
-ymax = float(height/2)
+xmin = -float(x)
+ymin = -float(y)
+xmax = float(x)
+ymax = float(y)
 tam = 40
 
 def init():
@@ -22,10 +23,10 @@ def init():
     glMatrixMode(GL_MODELVIEW)
     
     
-def mousepassivemotion(x, y):
+def mousepassivemotion(x_raton, y_raton):
     global raton
-    x0 = (xmax - xmin)/width * x + xmin
-    y0 = (ymin - ymax)/height * y + ymax
+    x0 = (xmax - xmin)/width * x_raton + xmin
+    y0 = (ymin - ymax)/height * y_raton + ymax
     if xmin < x0 and x0 < xmax and ymin < y0 and y0 < ymax:
         raton = [x0, y0]
     
@@ -61,6 +62,6 @@ glutCreateWindow("Ventana")
 init()
 
 glutDisplayFunc(plano)
-glutIdleFunc(idle)
 glutPassiveMotionFunc(mousepassivemotion)
+glutIdleFunc(idle)
 glutMainLoop()

@@ -20,76 +20,100 @@ theta = 0
 gamma = 0
 beta = 0
 
+# Tiempos de giro
+n = 36.5
+tiempo_sol = 1/25 * n
+tiempo_tierra_sol = 1/365 * n
+tiempo_tierra = 1 * n
+tiempo_luna_tierra = 1/27.3 * n
 
-def LoadTextures(choose):
+
+def LoadTextures(image):
     ### Textura
     
-    if choose=="sun":
-        sun_texture = Image.open("sun.jpg")
-        sun_xtexture = sun_texture.size[0]
-        sun_ytexture = sun_texture.size[1]
-
-        sun_texturebyte = sun_texture.tobytes("raw", "RGBX", 0, -1)
-        
-        surface = glGenTextures(1)
-
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, sun_xtexture, sun_ytexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, sun_texturebyte)
-
-        # Parámetros de la textura
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
-        
-    elif choose=="earth":
-        earth_texture = Image.open("earth.jpg")
-        earth_xtexture = earth_texture.size[0]
-        earth_ytexture = earth_texture.size[1]
-
-        earth_texturebyte = earth_texture.tobytes("raw", "RGBX", 0, -1)
-        
-        surface = glGenTextures(1)
+    surface = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, surface)
     
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, earth_xtexture, earth_ytexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, earth_texturebyte)
+    texture = Image.open(image + ".jpg")
+    xtexture = texture.size[0]
+    ytexture = texture.size[1]
+    texturebyte = texture.tobytes("raw", "RGBX", 0, -1)
 
-        # Parámetros de la textura
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, xtexture, ytexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, texturebyte)
     
-    elif choose=="moon":
-        moon_texture = Image.open("moon.jpg")
-        moon_xtexture = moon_texture.size[0]
-        moon_ytexture = moon_texture.size[1]
-
-        moon_texturebyte = moon_texture.tobytes("raw", "RGBX", 0, -1)
-    
-        surface = glGenTextures(1)
-
-        glTexImage2D(GL_TEXTURE_2D, 0, 3, moon_xtexture, moon_ytexture, 0, GL_RGBA, GL_UNSIGNED_BYTE, moon_texturebyte)
-
-        # Parámetros de la textura
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
+    # Parámetros de la textura
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
     return surface
 
-def sphere():
+def sun():
     """
-    Definimos la figura esfera
+    Definimos la figura sol
     """
-    global Sun, Earth, Moon
+    global Sun
+    
+    # Creamos la lista Sun que va a contener a nuestra esfera
+    Sun = glGenLists(1)
+    
+    # Creamos la cuádrica esfera, y le damos los parámetros adecuados
+    esfera = gluNewQuadric()
+    gluQuadricDrawStyle(esfera, GLU_FILL)
+    gluQuadricNormals(esfera, GLU_SMOOTH)
+    gluQuadricTexture(esfera, GL_TRUE)
+    glNewList(Sun, GL_COMPILE)  
+    
+    # Cargamos la textura DENTRO de la lista (no fuera)
+    surface = LoadTextures("sun")
+    glEnable(GL_TEXTURE_2D)
+
+    # Creamos una esfera
+    gluSphere(esfera, 10, 100, 100)
+    
+    # Eliminamos la esfera una vez creada
+    gluDeleteQuadric(esfera)
+    glDisable(GL_TEXTURE_2D)
+
+    glEndList()
+    
+def earth():
+    """
+    Definimos la figura tierra
+    """
+    global Earth
+    
+    # Creamos la lista Earth que va a contener a nuestra esfera
+    Earth = glGenLists(1)
+    
+    # Creamos la cuádrica esfera, y le damos los parámetros adecuados
+    esfera = gluNewQuadric()
+    gluQuadricDrawStyle(esfera, GLU_FILL)
+    gluQuadricNormals(esfera, GLU_SMOOTH)
+    gluQuadricTexture(esfera, GL_TRUE)
+    glNewList(Earth, GL_COMPILE)  
+    
+    # Cargamos la textura DENTRO de la lista (no fuera)
+    surface = LoadTextures("earth")
+    glEnable(GL_TEXTURE_2D)
+
+    # Creamos una esfera
+    gluSphere(esfera, 10, 100, 100)
+    
+    # Eliminamos la esfera una vez creada
+    gluDeleteQuadric(esfera)
+    glDisable(GL_TEXTURE_2D)
+
+    glEndList()
+
+def moon():
+    """
+    Definimos la figura luna
+    """
+    global Moon
     
     # Creamos la lista Moon que va a contener a nuestra esfera
     Moon = glGenLists(1)
@@ -104,7 +128,6 @@ def sphere():
     # Cargamos la textura DENTRO de la lista (no fuera)
     surface = LoadTextures("moon")
     glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, surface)
 
     # Creamos una esfera
     gluSphere(esfera, 10, 100, 100)
@@ -115,55 +138,6 @@ def sphere():
 
     glEndList()
     
-    #----------------------------------------------------------------
-    # Creamos la lista Earth que va a contener a nuestra esfera
-    Earth = glGenLists(1)
-    
-    # Creamos la cuádrica esfera, y le damos los parámetros adecuados
-    esfera = gluNewQuadric()
-    gluQuadricDrawStyle(esfera, GLU_FILL)
-    gluQuadricNormals(esfera, GLU_SMOOTH)
-    gluQuadricTexture(esfera, GL_TRUE)
-    glNewList(Earth, GL_COMPILE)  
-    
-    # Cargamos la textura DENTRO de la lista (no fuera)
-    surface = LoadTextures("earth")
-    glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, surface)
-
-    # Creamos una esfera
-    gluSphere(esfera, 10, 100, 100)
-    
-    # Eliminamos la esfera una vez creada
-    gluDeleteQuadric(esfera)
-    glDisable(GL_TEXTURE_2D)
-
-    glEndList()
-    
-    #----------------------------------------------------------------
-    # Creamos la lista Sun que va a contener a nuestra esfera
-    Sun = glGenLists(1)
-    
-    # Creamos la cuádrica esfera, y le damos los parámetros adecuados
-    esfera = gluNewQuadric()
-    gluQuadricDrawStyle(esfera, GLU_FILL)
-    gluQuadricNormals(esfera, GLU_SMOOTH)
-    gluQuadricTexture(esfera, GL_TRUE)
-    glNewList(Sun, GL_COMPILE)  
-    
-    # Cargamos la textura DENTRO de la lista (no fuera)
-    surface = LoadTextures("sun")
-    glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, surface)
-
-    # Creamos una esfera
-    gluSphere(esfera, 10, 100, 100)
-    
-    # Eliminamos la esfera una vez creada
-    gluDeleteQuadric(esfera)
-    glDisable(GL_TEXTURE_2D)
-
-    glEndList()
     
 def init():
     # Color blanco de fondo
@@ -198,12 +172,12 @@ def dibujo():
     glRotatef(-theta, 0, 1, 0) # vertical no cambia con el movimiento de traslación a lo largo de su órbita
     
     glPushMatrix()
-    glRotatef(23, 0, 0, -1) ## La rotacion colocan el eje en la posición que simula la de la Tierra ??
+    glRotatef(23, 0, 0, -1) ## La rotacion colocan el eje en la posición que simula la de la Tierra
     glRotatef(gamma, 0, 1, 0) # Rotacion de la Tierra sobre si misma
     glRotatef(-90, 1, 0, 0) # Colocamos en posición vertical la esfera
     glScalef(1/3, 1/3, 1/3)
     
-    glCallList(Sun)
+    glCallList(Earth)
     glPopMatrix()
     
     # Rotacion de la Luna sobre la Tierra
@@ -211,7 +185,7 @@ def dibujo():
     glTranslatef(10, 0, 0)
     glScalef(1/9, 1/9, 1/9)
     
-    glCallLists(Earth)
+    glCallLists(Moon)
     glPopMatrix()
     
     glPushMatrix()
@@ -219,7 +193,7 @@ def dibujo():
     glRotatef(-90, 1, 0, 0) # Colocamos en posición vertical la esfera
     glScalef(1, 1, 1)
     
-    glCallLists(Moon)
+    glCallLists(Sun)
     glPopMatrix()
     
     glPopMatrix()
@@ -228,10 +202,11 @@ def dibujo():
 
 def idle():
     global alpha, theta, gamma, beta
-    alpha = setangle(alpha + 1.46)
-    theta = setangle(theta + 0.1)
-    gamma = setangle(gamma + 36.5)
-    beta = setangle(beta + 0.97)
+    global n, tiempo_sol, tiempo_tierra_sol, tiempo_tierra, tiempo_luna
+    alpha = setangle(alpha + tiempo_sol)
+    theta = setangle(theta + tiempo_tierra_sol)
+    gamma = setangle(gamma + tiempo_tierra)
+    beta = setangle(beta + tiempo_luna_tierra)
     glutPostRedisplay()
     
 def setangle(alpha):
@@ -259,7 +234,9 @@ glutInitWindowSize(xw, yw)
 glutCreateWindow("Sistema Solar: Tierra, Luna y Sol")
 
 init()
-sphere()
+sun()
+earth()
+moon()
 
 glutDisplayFunc(dibujo)
 glutIdleFunc(idle)
